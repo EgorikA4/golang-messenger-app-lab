@@ -1,0 +1,32 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    restart: unless-stopped
+    command: start-dev
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://auth-database:5432/${AUTH_DB_NAME}
+      - KC_DB_USERNAME=${AUTH_DB_USER}
+      - KC_DB_PASSWORD=${AUTH_DB_PASS}
+
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    depends_on:
+      - auth-database
+    ports:
+      - 8090:8080
+
+  auth-database:
+    image: postgres:17.4-alpine3.21
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${AUTH_DB_USER}
+      - POSTGRES_PASSWORD=${AUTH_DB_PASS}
+      - POSTGRES_DB=${AUTH_DB_NAME}
+    ports:
+      - 127.0.0.1:5442:5432
+    volumes:
+      - auth-database-data:/var/lib/postgresql/data
+
+volumes:
+  auth-database-data:
