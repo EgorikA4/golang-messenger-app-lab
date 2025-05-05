@@ -7,7 +7,7 @@ services:
     volumes:
       - ./web:/var/www/web
       - ./config/balancer:/etc/nginx/templates
-  
+
   websocket:
     image: centrifugo/centrifugo:v6.1
     restart: unless-stopped
@@ -20,7 +20,9 @@ services:
       nofile:
         soft: 65535
         hard: 65535
-  
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   database:
     image: postgres:17.4-alpine3.21
     restart: unless-stopped
@@ -32,6 +34,41 @@ services:
       - 127.0.0.1:5432:5432
     volumes:
       - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "pg_isready",
+        "-d",
+        "$DB_NAME"
+      ]
+      retries: 10
+      interval: 5s
+      timeout: 5s
+      start_period: 80s
+
+  migration-service:
+    image: migrate/migrate
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      database:
+        condition: service_healthy
+    command: [
+      "-path",
+      "/migrations",
+      "-database",
+      "postgres://$DB_USER:$DB_PASS@database/$DB_NAME?sslmode=disable",
+      "goto",
+      "$DB_VERSION"
+    ]
+
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
 
 volumes:
   database-data:

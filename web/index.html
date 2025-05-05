@@ -1,48 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FrontendApp</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .hidden { display: none; }
-        .form-group { margin-bottom: 15px; }
-        input, select, button { padding: 8px; width: 100%; box-sizing: border-box; }
-        .status { margin-top: 10px; color: green; }
-        .error { color: red; }
-    </style>
-    <script src="centrifuge.js"></script>
+    <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-    <div id="login-section">
-        <h2>Login</h2>
-        <div class="form-group">
-            <input type="text" id="username" placeholder="Username" required>
-        </div>
-        <div class="form-group">
-            <input type="password" id="password" placeholder="Password" required>
-        </div>
-        <button id="btnLogin">Login</button>
-        <div id="login-error" class="error hidden" style="margin-top: 10px;"></div>
-    </div>  
+    <!-- Login Section -->
+    <section id="login-section" class="form-container">
+        <form id="login-form">
+            <fieldset>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter username" required />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required />
+                </div>
+                <button type="submit" id="btnLogin">Login</button>
+                <div id="login-error" class="error hidden"></div>
+            </fieldset>
+        </form>
+    </section>
 
-    <div id="main-section" class="hidden">
-        <div class="form-group">
+    <!-- Main App Section -->
+    <section id="main-section" class="form-container hidden">
+        <!-- Publish Form -->
+        <div class="form-card">
             <h3>Publish to Channel</h3>
-            <select id="channel-select"></select>
-            <input type="text" id="message-input" placeholder="Your message" required>
-            <button onclick="publishMessage()">Publish</button>
-            <div id="publish-status" class="status"></div>
+            <form id="publish-form">
+                <div class="form-group">
+                    <label for="channel-select">Select Channel:</label>
+                    <select id="channel-select" name="channel-select">
+                        <option value="">-- Select a channel --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message-input">Message:</label>
+                    <input type="text" id="message-input" name="message-input" placeholder="Your message" required />
+                </div>
+                <button type="submit" id="btnPublish">Publish</button>
+                <div id="publish-status" class="status"></div>
+            </form>
         </div>
 
-        <div class="form-group">
+        <!-- Subscribe Form -->
+        <div class="form-card">
             <h3>Subscribe to Channel</h3>
-            <input type="text" id="subscribe-input" placeholder="Channel name">
-            <button onclick="subscribe()">Subscribe</button>
-            <div id="subscribe-status" class="status"></div>
+            <form id="subscribe-form">
+                <div class="form-group">
+                    <label for="subscribe-input">Channel Name:</label>
+                    <input type="text" id="subscribe-input" name="subscribe-input" placeholder="Enter channel name"
+                        required />
+                </div>
+                <button type="submit" id="btnSubscribe">Subscribe</button>
+                <div id="subscribe-status" class="status"></div>
+            </form>
         </div>
-    </div>
-    <script src="script.js"></script>
+    </section>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/centrifuge@5.2.2/dist/centrifuge.js"></script>
+
+    <!-- App Modules -->
+    <script src="js/centrifuge.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
 </body>
+
 </html>
-`

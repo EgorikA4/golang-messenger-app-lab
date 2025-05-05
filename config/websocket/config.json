@@ -4,8 +4,8 @@
          "*"
       ],
       "token": {
-         "user_id_claim": "sid",
-         "jwks_public_endpoint": "http://keycloak:8080/realms/master/protocol/openid-connect/certs"
+         "user_id_claim": "sub",
+         "jwks_public_endpoint": "http://keycloak:8080/realms/messenger/protocol/openid-connect/certs"
       }
    },
    "http_api": {
@@ -13,11 +13,25 @@
    },
    "channel": {
       "without_namespace": {
+         "subscribe_proxy_enabled": true,
          "allow_subscribe_for_client": true,
          "allow_subscribe_for_anonymous": true,
          "allow_publish_for_client": true,
          "allow_publish_for_anonymous": true,
          "allow_publish_for_subscriber": true
+      },
+      "proxy": {
+         "subscribe": {
+            "endpoint": "grpc://host.docker.internal:10000"
+         }
+      }
+   },
+   "rpc": {
+      "proxy": {
+         "endpoint": "grpc://host.docker.internal:10000"
+      },
+      "without_namespace": {
+         "proxy_enabled": true
       }
    },
    "admin": {
