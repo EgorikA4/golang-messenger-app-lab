@@ -14,14 +14,16 @@
    "channel": {
       "without_namespace": {
          "subscribe_proxy_enabled": true,
+         "publish_proxy_enabled": true,
          "allow_subscribe_for_client": true,
-         "allow_subscribe_for_anonymous": true,
          "allow_publish_for_client": true,
-         "allow_publish_for_anonymous": true,
          "allow_publish_for_subscriber": true
       },
       "proxy": {
          "subscribe": {
+            "endpoint": "grpc://host.docker.internal:10000"
+         },
+         "publish": {
             "endpoint": "grpc://host.docker.internal:10000"
          }
       }

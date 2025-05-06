@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	Client         *gocloak.GoCloak
+	Client              *gocloak.GoCloak
 	initCloakClientOnce sync.Once
 )
 

@@ -8,14 +8,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Service ...
 type Service struct {
 	proxyproto.UnimplementedCentrifugoProxyServer
 	conn    *pgxpool.Pool
 	storage *db.Queries
 }
 
-// New ...
 func New(uri string) (*Service, error) {
 	connCfg, err := pgxpool.ParseConfig(uri)
 	if err != nil {

@@ -87,6 +87,40 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
+const subscribeUserOnDefaultChans = `-- name: SubscribeUserOnDefaultChans :exec
+insert into "public"."user_channel"
+("user_id", "chan_id", "can_publish")
+select
+	$1,
+	id,
+	false
+from "public"."channel"
+where "channel"."default"=true
+`
+
+func (q *Queries) SubscribeUserOnDefaultChans(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, subscribeUserOnDefaultChans, userID)
+	return err
+}
+
+const userCanPublish = `-- name: UserCanPublish :one
+select "can_publish"
+from "public"."user_channel"
+where "user_id"=$1 and "chan_id"=(select "id" from "public"."channel" where "channel"=$2)
+`
+
+type UserCanPublishParams struct {
+	UserID  uuid.UUID
+	Channel string
+}
+
+func (q *Queries) UserCanPublish(ctx context.Context, arg UserCanPublishParams) (bool, error) {
+	row := q.db.QueryRow(ctx, userCanPublish, arg.UserID, arg.Channel)
+	var can_publish bool
+	err := row.Scan(&can_publish)
+	return can_publish, err
+}
+
 const userListByChanID = `-- name: UserListByChanID :many
 SELECT "user"."id", "user"."username", "user"."given_name", "user"."family_name", "user"."enabled"
 FROM "public"."user"

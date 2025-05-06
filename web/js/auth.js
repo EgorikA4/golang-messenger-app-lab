@@ -22,14 +22,26 @@ window.Auth = {
             body.append("grant_type", "refresh_token");
         }
 
-        const res = await fetch(KEYCLOAK_TOKEN_URL, {
+        return await fetch(KEYCLOAK_TOKEN_URL, {
             method: "POST",
             headers: headers,
             body: body
-        });
-        const data = await res.json();
-        refresh_token = data.refresh_token;
-        return data.access_token;
+        })
+            .then(async (response) => {
+                if (response.status === 401) {
+                    window.UI.setErrorUnderLoginForm("Bad credentials!");
+                } else if (response.status === 200) {
+                    data = await response.json();
+                    refresh_token = data.refresh_token;
+                    return data.access_token;
+                } else {
+                    window.UI.setErrorUnderLoginForm("Unexpected error!");
+                    return;
+                }
+            })
+            .catch(async (error) => {
+                window.UI.setErrorUnderLoginForm(`Unexpected error: ${error.message}`);
+            });
     },
     setCredentials: function (user, pass) {
         username = user;

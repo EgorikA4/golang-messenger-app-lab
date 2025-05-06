@@ -24,7 +24,21 @@ JOIN "public"."user_channel" ON "user_channel"."user_id" = "user"."id"
 WHERE "user_channel"."chan_id"=$1
 ;
 
--- name: UserCanSubscribe :one
-
+-- name: SubscribeUserOnDefaultChans :exec
+insert into "public"."user_channel"
+("user_id", "chan_id", "can_publish")
+select
+	$1,
+	id,
+	false
+from "public"."channel"
+where "channel"."default"=true
+;
 
 -- name: UserCanPublish :one
+select "can_publish"
+from "public"."user_channel"
+where "user_id"=$1 and "chan_id"=(select "id" from "public"."channel" where "channel"=$2)
+;
+
+-- name: UserCanSubscribe :one
