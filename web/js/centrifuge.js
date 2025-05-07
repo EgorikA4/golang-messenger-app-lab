@@ -1,7 +1,7 @@
 const CENTRIFUGE_URL = "ws://127.0.0.1:8080/centrifugo/connection/websocket";
 
 let client = null;
-const subscriptions = {};
+let subscriptions = new Map();
 
 window.CentrifugeClient = {
     init: function () {
@@ -34,40 +34,42 @@ window.CentrifugeClient = {
             channelsList = response.data
             for (let index = 0; index < channelsList.length; index++) {
                 const channel = channelsList[index];
-                subscriptions[channel.Title] = channel.Channel;
+                subscriptions.set(channel.Title, channel.Channel);
                 window.UI.addElementToPublishFormList(channel.Title);
             }
         });
     },
     getChannelByTitle: function (title) {
-        return subscriptions[title];
+        return subscriptions.get(title);
     },
     publishMessage: function (channel, message) {
         return client.publish(channel, {"message": message});
     },
 
-    // TODO: check if exists (title -> channel) && (channel -> title) dicts
     subscribeToChannel: function (channelName, callback) {
-        if (channelName in subscriptions.values()) {
-            console.log("Already subscribed to", channelName);
-            return;
+        for (let channel of subscriptions.values()) {
+            if (channel === channelName) {
+                window.UI.setStatusUnderSubscribeForm(`Already subscribed to ${channelName}`);
+                return;
+            }
         }
 
-        const sub = client.newSubscription(channelName);
-        const title = Object.keys(subscriptions).find(key => subscriptions[key] === channelName);
+        let sub = client.newSubscription(channelName);
         sub.on("publication", (ctx) => {
-            console.log("Received message on", title, ctx.data);
+            console.log("Received message on", ctx.data);
             if (callback) callback(ctx.data);
         });
 
-        sub.on("subscribed", () => {
-            console.log("Subscribed to", channelName);
-            subscriptions[title] = channelName;
-            window.UI.addElementToPublishFormList(channel.Title);
+        sub.on("subscribed", (ctx) => {
+            const data = ctx.data;
+            console.log("Subscribed to", data.Channel);
+            subscriptions.set(data.Title, data.Channel);
+            window.UI.addElementToPublishFormList(data.Title);
         });
 
-        sub.on("error", (err) => {
-            console.error("Subscription error:", err.message);
+        sub.on("error", (ctx) => {
+            console.log(ctx);
+            console.log("Subscription error:", ctx);
         });
 
         sub.subscribe();

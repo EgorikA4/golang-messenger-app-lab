@@ -68,6 +68,25 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const getChanByID = `-- name: GetChanByID :one
+select "id", "channel", "title"
+from "public"."channel"
+where "channel"=$1
+`
+
+type GetChanByIDRow struct {
+	ID      int64
+	Channel string
+	Title   string
+}
+
+func (q *Queries) GetChanByID(ctx context.Context, channel string) (GetChanByIDRow, error) {
+	row := q.db.QueryRow(ctx, getChanByID, channel)
+	var i GetChanByIDRow
+	err := row.Scan(&i.ID, &i.Channel, &i.Title)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
 SELECT "id", "username", "given_name", "family_name", "enabled"
 FROM "public"."user"
@@ -85,6 +104,22 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Enabled,
 	)
 	return i, err
+}
+
+const subscribeUserOnChan = `-- name: SubscribeUserOnChan :exec
+insert into "public"."user_channel"
+("user_id", "chan_id", "can_publish")
+values ($1, $2, false)
+`
+
+type SubscribeUserOnChanParams struct {
+	UserID uuid.UUID
+	ChanID int64
+}
+
+func (q *Queries) SubscribeUserOnChan(ctx context.Context, arg SubscribeUserOnChanParams) error {
+	_, err := q.db.Exec(ctx, subscribeUserOnChan, arg.UserID, arg.ChanID)
+	return err
 }
 
 const subscribeUserOnDefaultChans = `-- name: SubscribeUserOnDefaultChans :exec

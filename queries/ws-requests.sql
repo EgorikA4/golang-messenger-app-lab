@@ -35,10 +35,20 @@ from "public"."channel"
 where "channel"."default"=true
 ;
 
+-- name: SubscribeUserOnChan :exec
+insert into "public"."user_channel"
+("user_id", "chan_id", "can_publish")
+values ($1, $2, false)
+;
+
 -- name: UserCanPublish :one
 select "can_publish"
 from "public"."user_channel"
 where "user_id"=$1 and "chan_id"=(select "id" from "public"."channel" where "channel"=$2)
 ;
 
--- name: UserCanSubscribe :one
+-- name: GetChanByID :one
+select "id", "channel", "title"
+from "public"."channel"
+where "channel"=$1
+;
